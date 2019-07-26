@@ -1,11 +1,11 @@
 const axios = require('axios');
 
-const { authenticate, hashPassword } = require('../auth/authenticate');
+const { authenticate, hashPassword, reversePasswordHash, generateToken } = require('../auth/authenticate');
 const Users = require('./usersModel');
 
 module.exports = server => {
   server.post('/api/register', hashPassword, register);
-  server.post('/api/login', login);
+  server.post('/api/login', reversePasswordHash, login);
   server.get('/api/jokes', authenticate, getJokes);
 };
 
@@ -25,9 +25,26 @@ async function register(req, res, next) {
   }
 }
 
-function login(req, res) {
-  // implement user login
-  res.send('here').end()
+async function login(req, res, next) {
+  try {
+    if (req.user) {
+      const token = await generateToken(req.user);
+      
+      res
+        .status(200)
+        .json({
+          user: {
+            id: req.user.id,
+            username: req.user.username,
+          },
+          token
+        });
+    } else {
+      next(new Error("You are not authorised"));
+    }
+  } catch (error) {
+    next(new Error('Login failed miserably. Kindly try again'));
+  }
 }
 
 function getJokes(req, res) {

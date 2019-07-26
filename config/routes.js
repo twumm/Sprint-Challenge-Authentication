@@ -1,19 +1,33 @@
 const axios = require('axios');
 
-const { authenticate } = require('../auth/authenticate');
+const { authenticate, hashPassword } = require('../auth/authenticate');
+const Users = require('./usersModel');
 
 module.exports = server => {
-  server.post('/api/register', register);
+  server.post('/api/register', hashPassword, register);
   server.post('/api/login', login);
   server.get('/api/jokes', authenticate, getJokes);
 };
 
-function register(req, res) {
-  // implement user registration
+async function register(req, res, next) {
+  const { username } = req.body;
+  const user = {
+    username,
+    password: req.hashedPassword
+  }
+  try {
+    const newUser = await Users.addUser(user);
+    res
+      .status(201)
+      .json(newUser);
+  } catch (error) {
+    next(new Error('Could not register user. Please try again'));
+  }
 }
 
 function login(req, res) {
   // implement user login
+  res.send('here').end()
 }
 
 function getJokes(req, res) {

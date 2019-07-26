@@ -16,6 +16,44 @@ function App() {
   const [requestError, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const signUp = async (userObject) => {
+    setLoading(true);
+    try {
+      await axios.post(`${authUrl}/api/register`, userObject);
+      const signedInUser = await signIn(userObject)
+      setUser(signedInUser.data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signIn = async (userObject) => {
+    setLoading(true);
+    try {
+      const user = await axios.post(`${authUrl}/api/login`, userObject);
+      setToken(true);
+      await localStorage.setItem('token', user.data.token);
+      setUser(user.data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getJokes = async () => {
+    try {
+      const jokes = await axios.get(`${authUrl}/api/jokes`);
+      setJokes(jokes);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="App">
       <Router>
@@ -53,6 +91,7 @@ function App() {
               <ListJokes
                 {...props}
                 jokes={jokes}
+                user={user}
                 error={requestError}
                 loading={loading}
               />

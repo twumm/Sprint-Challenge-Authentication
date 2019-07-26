@@ -9,7 +9,27 @@ const server = express();
 server.use(helmet());
 server.use(cors());
 server.use(express.json());
+server.use(logger);
 
 configureRoutes(server);
+
+function logger(req, res, next) {
+  console.log(
+    `[${new Date().toISOString()}] ${req.method} request from ${req.url}}`
+  );
+  next();
+}
+
+function errorHandler(error, req, res) {
+  console.error('ERROR', error);
+  res
+    .status(500)
+    .json({
+      message: error.message,
+      stack: error.stack
+    });
+}
+
+server.use(errorHandler);
 
 module.exports = server;

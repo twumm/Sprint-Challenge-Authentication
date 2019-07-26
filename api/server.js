@@ -13,6 +13,12 @@ server.use(logger);
 
 configureRoutes(server);
 
+server.get('/', (req, res) => {
+  res
+    .status(200)
+    .json({ content: 'up' });
+})
+
 function logger(req, res, next) {
   console.log(
     `[${new Date().toISOString()}] ${req.method} request from ${req.url}}`

@@ -1,4 +1,7 @@
 const db = require('../database/dbConfig');
+const request = require('supertest');
+
+const server = require('../api/server');
 const Users = require('./usersModel');
 
 beforeEach(async () => {
@@ -32,3 +35,16 @@ describe('create user', () => {
     expect(users[2].username).toBe('Mensah');
   })
 })
+
+// describe('registers user', () => {
+//   it('[POST] /api/register works', () => {
+//     return request(server)
+//       .post('/api/register')
+//       .expect(201)
+//       // .expect('Content-Length', '16')
+//       // .expect('Content-Type', /json/)
+//       // .then(res => {
+//       //   expect(res.body).toEqual({ content: 'up' })
+//       // })
+//   })
+// })

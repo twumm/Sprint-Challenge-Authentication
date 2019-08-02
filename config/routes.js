@@ -1,19 +1,50 @@
 const axios = require('axios');
 
-const { authenticate } = require('../auth/authenticate');
+const { authenticate, hashPassword, reversePasswordHash, generateToken } = require('../auth/authenticate');
+const Users = require('./usersModel');
 
 module.exports = server => {
-  server.post('/api/register', register);
-  server.post('/api/login', login);
+  server.post('/api/register', hashPassword, register);
+  server.post('/api/login', reversePasswordHash, login);
   server.get('/api/jokes', authenticate, getJokes);
 };
 
-function register(req, res) {
-  // implement user registration
+async function register(req, res, next) {
+  const { username } = req.body;
+  const user = {
+    username,
+    password: req.hashedPassword
+  }
+  try {
+    const newUser = await Users.addUser(user);
+    res
+      .status(201)
+      .json(newUser);
+  } catch (error) {
+    next(new Error('Could not register user. Please try again'));
+  }
 }
 
-function login(req, res) {
-  // implement user login
+async function login(req, res, next) {
+  try {
+    if (req.user) {
+      const token = await generateToken(req.user);
+      
+      res
+        .status(200)
+        .json({
+          user: {
+            id: req.user.id,
+            username: req.user.username,
+          },
+          token
+        });
+    } else {
+      next(new Error("You are not authorised"));
+    }
+  } catch (error) {
+    next(new Error('Login failed miserably. Kindly try again'));
+  }
 }
 
 function getJokes(req, res) {
